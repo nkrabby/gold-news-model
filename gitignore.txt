@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.streamlit/
+download/
+outputs/*.log
+
+# Raw feeds are re-downloaded on every run; committing them made each refresh
+# push ~57 MB and eventually broke pushes. Only derived outputs are tracked.
+data/raw/
+data/processed/
+outputs/*.joblib
+outputs/*.csv
+!outputs/forecast_log.csv
+!outputs/live_scoring.csv
