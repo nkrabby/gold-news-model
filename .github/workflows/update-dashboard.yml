@@ -18,22 +18,33 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
+          cache-dependency-path: gold-news-model/requirements.txt
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: python -m pip install -r requirements.txt
+
+      - name: Install requirements
+        run: python -m pip install -r requirements.txt
+        working-directory: gold-news-model
+
       - name: Refresh prices, calendar, research, models and dashboard
         run: python src/refresh_live.py
-      - name: Commit only the files that must persist
+        working-directory: gold-news-model
+
+      - name: Commit refreshed files
         run: |
           git config user.name "gold-news-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add -f outputs/forecast_log.csv outputs/live_scoring.csv \
-                     outputs/live_status.json Gold_News_Dashboard.html
+          git add -f gold-news-model/outputs/forecast_log.csv \
+                     gold-news-model/outputs/live_scoring.csv \
+                     gold-news-model/outputs/live_status.json \
+                     gold-news-model/Gold_News_Dashboard.html
           if git diff --cached --quiet; then
             echo "No material changes"
           else
