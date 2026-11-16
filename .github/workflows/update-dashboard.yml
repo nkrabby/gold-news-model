@@ -13,12 +13,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
- - name: Find project files
-  run: |
-    pwd
-    find . -maxdepth 4 \( -name refresh_live.py -o -name requirements.txt -o -name Gold_News_Dashboard.html \) -print    
-    
-  runs-on: ubuntu-latest
+  refresh:
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -27,7 +23,7 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-         
+          cache-dependency-path: gold-news-model/requirements.txt
 
       - uses: actions/setup-node@v4
         with:
@@ -35,11 +31,12 @@ jobs:
 
       - name: Install requirements
         run: python -m pip install -r requirements.txt
-        
+        working-directory: gold-news-model
 
       - name: Refresh prices, calendar, research, models and dashboard
         run: python src/refresh_live.py
-        
+        working-directory: gold-news-model
+
       - name: Commit refreshed files
         run: |
           git config user.name "gold-news-bot"
