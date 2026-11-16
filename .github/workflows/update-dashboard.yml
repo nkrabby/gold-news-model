@@ -31,55 +31,47 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Find project, install requirements, refresh dashboard
+      - name: Install requirements
+        run: python -m pip install -r requirements.txt
+
+      - name: Restore project folders
         run: |
           set -e
+          mkdir -p src outputs
 
-          SCRIPT="$(find . -maxdepth 6 -type f -path '*/src/refresh_live.py' -print -quit)"
-          if [ -z "$SCRIPT" ]; then
-            echo "ERROR: Could not find src/refresh_live.py in this repository."
-            echo "Files and folders at the repository top level:"
-            ls -la
-            exit 1
-          fi
+          # The uploaded files are currently flat. Move Python modules into src/,
+          # keeping app.py at the repository top level.
+          for file in ./*.py; do
+            [ -f "$file" ] || continue
+            [ "$(basename "$file")" = "app.py" ] && continue
+            mv "$file" src/
+          done
 
-          PROJECT_DIR="${SCRIPT%/src/refresh_live.py}"
-          echo "Found refresh script: $SCRIPT"
-          echo "Project directory: $PROJECT_DIR"
+          # Put persistent dashboard outputs where the project expects them.
+          for file in forecast_log.csv live_scoring.csv live_status.json; do
+            if [ -f "$file" ]; then
+              mv "$file" outputs/
+            fi
+          done
 
-          REQUIREMENTS="$(find . -maxdepth 6 -type f -name requirements.txt -print -quit)"
-          if [ -z "$REQUIREMENTS" ]; then
-            echo "ERROR: Could not find requirements.txt."
-            exit 1
-          fi
+          echo "Project files are now arranged:"
+          ls -la
+          ls -la src
+          ls -la outputs
 
-          echo "Installing from: $REQUIREMENTS"
-          python -m pip install -r "$REQUIREMENTS"
-
-          echo "Starting dashboard refresh..."
-          python "$SCRIPT"
-
-          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+      - name: Refresh prices, calendar, research, models and dashboard
+        run: python src/refresh_live.py
 
       - name: Commit refreshed files
         run: |
           set -e
-
           git config user.name "gold-news-bot"
           git config user.email "actions@users.noreply.github.com"
 
-          for file in \
-            "$PROJECT_DIR/outputs/forecast_log.csv" \
-            "$PROJECT_DIR/outputs/live_scoring.csv" \
-            "$PROJECT_DIR/outputs/live_status.json" \
-            "$PROJECT_DIR/Gold_News_Dashboard.html"
-          do
-            if [ -f "$file" ]; then
-              git add -f "$file"
-            else
-              echo "Not present, skipping: $file"
-            fi
-          done
+          git add -f outputs/forecast_log.csv \
+                     outputs/live_scoring.csv \
+                     outputs/live_status.json \
+                     Gold_News_Dashboard.html
 
           if git diff --cached --quiet; then
             echo "No material changes to commit."
