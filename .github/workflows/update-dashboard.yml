@@ -13,7 +13,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  refresh:
+- name: Find project files
+  run: 
+    pwd
+    find . -maxdepth 4 \( -name refresh_live.py -o -name requirements.txt -o -name Gold_News_Dashboard.html \) -print
+  
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
