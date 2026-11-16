@@ -37,8 +37,8 @@ jobs:
       - name: Restore project folders
         run: |
           set -e
-          mkdir -p src outputs
-
+          mkdir -p src outputs data/raw data/processed download
+          
           # The uploaded files are currently flat. Move Python modules into src/,
           # keeping app.py at the repository top level.
           for file in ./*.py; do
