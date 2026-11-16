@@ -34,7 +34,8 @@ jobs:
 
       - name: Refresh prices, calendar, research, models and dashboard
         run: python src/refresh_live.py
-       
+        working-directory: gold-news-model
+
       - name: Commit refreshed files
         run: |
           git config user.name "gold-news-bot"
