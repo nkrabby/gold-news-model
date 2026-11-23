@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-11-23T12:07:42.832825+00:00",
-  "price_timestamp": "2026-11-23T11:55:00+00:00",
-  "last_bid": 3618.925,
-  "pre_return_24h": 0.015682194634454506,
-  "calendar_last_updated": "2026-11-23T12:07:42.832852+00:00",
-  "research_last_updated": "2026-11-23T12:07:42.832856+00:00",
+  "generated_at": "2026-11-23T16:20:20.357482+00:00",
+  "price_timestamp": "2026-11-23T16:10:00+00:00",
+  "last_bid": 3670.035,
+  "pre_return_24h": 0.02970637303023259,
+  "calendar_last_updated": "2026-11-23T16:20:20.357502+00:00",
+  "research_last_updated": "2026-11-23T16:20:20.357505+00:00",
   "source_note": "Free public sources; timestamps may lag and scheduled jobs can be delayed."
 }
