@@ -7,17 +7,51 @@ ROOT=Path(__file__).resolve().parents[1]
 INSTRUMENTS={"dxy":"dollaridxusd","oil":"brentcmdusd","volatility":"volidxusd"}
 FEATURES=["dxy_return_24h","oil_return_24h","volatility_change_24h","dgs2_change_5d","dgs10_change_5d","real_yield_change_5d"]
 
-def download_market(start="2019-01-01",end=None):
-    end=end or (pd.Timestamp.utcnow()+pd.Timedelta(days=1)).strftime('%Y-%m-%d')
-    out=ROOT/'data/raw/market';out.mkdir(parents=True,exist_ok=True)
-    for name,instrument in INSTRUMENTS.items():
-        path=out/f'{name}_h1.csv'
-        # A complete hourly history is compact and avoids broker-specific daily candles.
-        subprocess.run(['npx','--yes','dukascopy-node','-i',instrument,'-from',start,'-to',end,'-t','h1','-f','csv'],cwd=ROOT,check=True)
-        found=list((ROOT/'download').glob(f'{instrument}-h1-bid-*.csv'))
-        if not found:raise RuntimeError(f'No data for {instrument}')
-        found[0].replace(path)
-        print(name,len(pd.read_csv(path)))
+def download_market(start="2019-01-01", end=None):
+    """Reuse saved history and fetch only recent market bars."""
+    end = end or (pd.Timestamp.utcnow() + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+    out = ROOT / "data/raw/market"
+    out.mkdir(parents=True, exist_ok=True)
+
+    for name, instrument in INSTRUMENTS.items():
+        path = out / f"{name}_h1.csv"
+        old = None
+        fetch_start = start
+
+        if path.exists():
+            old = pd.read_csv(path)
+            if not old.empty and "timestamp" in old.columns:
+                last = pd.to_datetime(old["timestamp"], unit="ms", utc=True).max()
+                fetch_start = max(
+                    pd.Timestamp(start, tz="UTC"),
+                    last - pd.Timedelta(days=3),
+                ).strftime("%Y-%m-%d")
+
+        subprocess.run(
+            [
+                "npx", "--yes", "dukascopy-node",
+                "-i", instrument,
+                "-from", fetch_start,
+                "-to", end,
+                "-t", "h1",
+                "-f", "csv",
+            ],
+            cwd=ROOT,
+            check=True,
+        )
+
+        found = list((ROOT / "download").glob(f"{instrument}-h1-bid-*.csv"))
+        if not found:
+            raise RuntimeError(f"No data for {instrument}")
+
+        fresh = pd.read_csv(max(found, key=lambda f: f.stat().st_mtime))
+        for file in found:
+            file.unlink(missing_ok=True)
+
+        merged = pd.concat([old, fresh], ignore_index=True) if old is not None else fresh
+        merged = merged.drop_duplicates("timestamp", keep="last").sort_values("timestamp")
+        merged.to_csv(path, index=False)
+        print(f"{name}: {len(merged)} bars; downloaded from {fetch_start}")
 
 def load_market():
     frames={}
