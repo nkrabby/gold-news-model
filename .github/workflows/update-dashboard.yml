@@ -72,6 +72,7 @@ jobs:
                      outputs/live_scoring.csv \
                      outputs/live_status.json \
                      Gold_News_Dashboard.html
+          git add -f data/raw/xauusd_m5.csv data/raw/forexfactory_usd.csv data/raw/market/*.csv
 
           if git diff --cached --quiet; then
             echo "No material changes to commit."
