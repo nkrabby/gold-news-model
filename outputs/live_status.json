@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-11-27T15:38:52.480197+00:00",
-  "price_timestamp": "2026-11-27T15:26:44+00:00",
-  "last_bid": 3660.413203893042,
-  "pre_return_24h": 0.00942950713232399,
+  "generated_at": "2026-11-27T16:48:13.990484+00:00",
+  "price_timestamp": "2026-11-27T16:36:45+00:00",
+  "last_bid": 3659.712265388071,
+  "pre_return_24h": 0.009320079756719016,
   "price_source": "Dukascopy XAUUSD spot history + Yahoo GC=F futures recent fallback (level-aligned)",
-  "calendar_last_updated": "2026-11-27T15:38:52.480218+00:00",
-  "research_last_updated": "2026-11-27T15:38:52.480220+00:00",
+  "calendar_last_updated": "2026-11-27T16:48:13.990511+00:00",
+  "research_last_updated": "2026-11-27T16:48:13.990513+00:00",
   "source_note": "Free public sources; timestamps may lag and scheduled jobs can be delayed."
 }
